@@ -97,7 +97,7 @@ export class EditorManager{
     zoom2Eye(index){
         this.scale = 1000;
         var offset = this.editor.getEyePosition(index);
-        this.resizeCamera(offset);
+        this.camera.resize(this.scale, offset);
     }
 
     zoom(index){
@@ -108,7 +108,7 @@ export class EditorManager{
         }
         else{
             this.scale = 30;
-            this.resizeCamera();
+            this.camera.resize(this.scale);
         }
     }
 
@@ -143,14 +143,6 @@ export class EditorManager{
         for(var i=0; i<modelList.length; i++){
             modelList[i] = this.editors[i].toJSON();
         }
-    }
-
-    resizeCamera(offset = new THREE.Vector3(0, 0, 0)){
-        this.camera.left = window.innerWidth / this.scale / - 2 + offset.x;
-        this.camera.right = window.innerWidth / this.scale / 2 + offset.x;
-        this.camera.top = window.innerHeight / this.scale / 2 + offset.y;
-        this.camera.bottom = window.innerHeight / this.scale / - 2 + offset.y;
-        this.camera.updateProjectionMatrix();
     }
 
     onMouseMove() {
