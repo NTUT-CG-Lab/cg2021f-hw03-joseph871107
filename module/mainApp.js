@@ -6,7 +6,7 @@ import { OrbitControls } from '../jsm/controls/OrbitControls.js';
 import { OutlineEffect } from '../jsm/effects/OutlineEffect.js';
 
 import { EditorManager } from './editorManager.js';
-import { Camera } from './camera.js';
+import { Camera } from './basic/camera.js';
 
 let SCREEN_WIDTH = window.innerWidth;
 let SCREEN_HEIGHT = window.innerHeight;

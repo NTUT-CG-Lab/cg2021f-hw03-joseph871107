@@ -1,5 +1,5 @@
-import * as THREE from '../build/three.module.js';
-import { Object3D } from './object3D.js';
+import * as THREE from '../../../build/three.module.js';
+import { Object3D } from '../../basic/object3D.js';
 
 export class EyeBorderLine extends Object3D{
     static createLine(start, end, color){

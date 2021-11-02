@@ -1,7 +1,7 @@
 import * as THREE from '../build/three.module.js';
-import { MouseRaycaster } from './mouseRaycaster.js';
-import { ModelVpdLoader } from './modelVpdLoader.js';
-import { ModelVpdGui } from './modelVpdGui.js';
+import { MouseRaycaster } from './basic/mouseRaycaster.js';
+import { ModelVpdLoader } from './model/modelVpdLoader.js';
+import { ModelVpdGui } from './model/modelVpdGui.js';
 import { PmxEditor } from './pmxEditor.js';
 
 export class EditorManager{

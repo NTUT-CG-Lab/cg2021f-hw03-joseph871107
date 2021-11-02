@@ -1,7 +1,7 @@
 import * as THREE from '../build/three.module.js';
-import { EyeLabelSystem } from './eyeLabelSystem.js';
-import { ModelLoader } from './modelLoader.js';
-import { ModelVpdGui } from './modelVpdGui.js';
+import { EyeLabelSystem } from './eyesManager/eyeLabelSystem.js';
+import { ModelLoader } from './model/modelLoader.js';
+import { ModelVpdGui } from './model/modelVpdGui.js';
 
 export class PmxEditor{
     constructor(scene, camera, modelPath, mouseRaycaster, gui, vpdLoader, callback=function(){}){
