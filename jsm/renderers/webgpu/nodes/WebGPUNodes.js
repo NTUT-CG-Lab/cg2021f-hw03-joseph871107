@@ -19,7 +19,7 @@ class WebGPUNodes {
 
 		if ( nodeBuilder === undefined ) {
 
-			nodeBuilder = new WebGPUNodeBuilder( object.material, this.renderer, lightNode ).build();
+			nodeBuilder = new WebGPUNodeBuilder( object, this.renderer, lightNode ).build();
 
 			this.builders.set( object, nodeBuilder );
 
@@ -43,6 +43,7 @@ class WebGPUNodes {
 
 	update( object, camera, lightNode ) {
 
+		const renderer = this.renderer;
 		const material = object.material;
 
 		const nodeBuilder = this.get( object, lightNode );
@@ -51,6 +52,7 @@ class WebGPUNodes {
 		nodeFrame.material = material;
 		nodeFrame.camera = camera;
 		nodeFrame.object = object;
+		nodeFrame.renderer = renderer;
 
 		for ( const node of nodeBuilder.updateNodes ) {
 

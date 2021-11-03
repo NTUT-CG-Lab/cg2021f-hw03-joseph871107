@@ -1,9 +1,15 @@
 import TempNode from '../core/Node.js';
-import CodeNode from '../core/CodeNode.js';
-import * as EncodingFunctions from '../functions/EncodingFunctions.js';
+import { ShaderNode } from '../ShaderNode.js';
 
-import { LinearEncoding, sRGBEncoding, RGBEEncoding, RGBM7Encoding, RGBM16Encoding,
-	RGBDEncoding, GammaEncoding, LogLuvEncoding } from 'three';
+import { LinearEncoding/*,
+	sRGBEncoding, RGBEEncoding, RGBM7Encoding, RGBM16Encoding,
+	RGBDEncoding, GammaEncoding, LogLuvEncoding*/ } from 'three';
+
+export const LinearToLinear = new ShaderNode( ( inputs ) => {
+
+	return inputs.value;
+
+} );
 
 function getEncodingComponents ( encoding ) {
 
@@ -11,6 +17,7 @@ function getEncodingComponents ( encoding ) {
 
 		case LinearEncoding:
 			return [ 'Linear' ];
+/*
 		case sRGBEncoding:
 			return [ 'sRGB' ];
 		case RGBEEncoding:
@@ -25,7 +32,7 @@ function getEncodingComponents ( encoding ) {
 			return [ 'Gamma', new CodeNode( 'float( GAMMA_FACTOR )' ) ];
 		case LogLuvEncoding:
 			return [ 'LogLuv' ];
-
+*/
 	}
 
 }
@@ -33,7 +40,7 @@ function getEncodingComponents ( encoding ) {
 class ColorSpaceNode extends TempNode {
 
 	static LINEAR_TO_LINEAR = 'LinearToLinear';
-
+/*
 	static GAMMA_TO_LINEAR = 'GammaToLinear';
 	static LINEAR_TO_GAMMA = 'LinearToGamma';
 
@@ -51,14 +58,14 @@ class ColorSpaceNode extends TempNode {
 
 	static LINEAR_TO_LOG_LUV = 'LinearToLogLuv';
 	static LOG_LUV_TO_LINEAR = 'LogLuvToLinear';
-
-	constructor( method, input ) {
+*/
+	constructor( method, node ) {
 
 		super( 'vec4' );
 
 		this.method = method;
 
-		this.input = input;
+		this.node = node;
 		this.factor = null;
 
 	}
@@ -85,35 +92,27 @@ class ColorSpaceNode extends TempNode {
 
 	}
 
-	generate( builder, output ) {
+	generate( builder ) {
+
+		const type = this.getNodeType( builder );
 
 		const method = this.method;
-		const input = this.input;
+		const node = this.node;
 
 		if ( method !== ColorSpaceNode.LINEAR_TO_LINEAR ) {
 
-			const nodeData = builder.getDataFromNode( this );
+			// disable for now color space
+			const encodingFunctionNode = LinearToLinear;
+			const factor = this.factor;
 
-			let encodingFunctionCallNode = nodeData.encodingFunctionCallNode;
-
-			if (encodingFunctionCallNode === undefined) {
-
-				const encodingFunctionNode = EncodingFunctions[ method ];
-
-				encodingFunctionCallNode = encodingFunctionNode.call( {
-					value: input,
-					factor: this.factor
-				} );
-
-				nodeData.encodingFunctionCallNode = encodingFunctionCallNode;
-
-			}
-
-			return encodingFunctionCallNode.build( builder, output );
+			return encodingFunctionNode( {
+				value: node,
+				factor
+			} ).build( builder, type );
 
 		} else {
 
-			return input.build( builder, output );
+			return node.build( builder, type );
 
 		}
 

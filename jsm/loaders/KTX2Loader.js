@@ -31,11 +31,13 @@ import {
 	sRGBEncoding,
 	UnsignedByteType
 } from '../../../build/three.module.js';
-import { WorkerPool } from '../utils/WorkerPool.js'
+import { WorkerPool } from '../utils/WorkerPool.js';
 
 const KTX2TransferSRGB = 2;
 const KTX2_ALPHA_PREMULTIPLIED = 1;
 const _taskCache = new WeakMap();
+
+let _activeLoaders = 0;
 
 class KTX2Loader extends Loader {
 
@@ -120,7 +122,7 @@ class KTX2Loader extends Loader {
 			binaryLoader.setPath( this.transcoderPath );
 			binaryLoader.setResponseType( 'arraybuffer' );
 			binaryLoader.setWithCredentials( this.withCredentials );
-			const binaryContent = binaryLoader.loadAsync( 'basis_transcoder.wasm' )
+			const binaryContent = binaryLoader.loadAsync( 'basis_transcoder.wasm' );
 
 			this.transcoderPending = Promise.all( [ jsContent, binaryContent ] )
 				.then( ( [ jsContent, binaryContent ] ) => {
@@ -145,14 +147,29 @@ class KTX2Loader extends Loader {
 
 						const worker = new Worker( this.workerSourceURL );
 						const transcoderBinary = this.transcoderBinary.slice( 0 );
-			
+
 						worker.postMessage( { type: 'init', config: this.workerConfig, transcoderBinary }, [ transcoderBinary ] );
-			
+
 						return worker;
-			
+
 					} );
 
 				} );
+
+			if ( _activeLoaders > 0 ) {
+
+				// Each instance loads a transcoder and allocates workers, increasing network and memory cost.
+
+				console.warn(
+
+					'THREE.KTX2Loader: Multiple active KTX2 loaders may cause performance issues.'
+					+ ' Use a single KTX2Loader instance, or call .dispose() on old instances.'
+
+				);
+
+			}
+
+			_activeLoaders++;
 
 		}
 
@@ -161,6 +178,12 @@ class KTX2Loader extends Loader {
 	}
 
 	load( url, onLoad, onProgress, onError ) {
+
+		if ( this.workerConfig === null ) {
+
+			throw new Error( 'THREE.KTX2Loader: Missing initialization with `.detectSupport( renderer )`.' );
+
+		}
 
 		const loader = new FileLoader( this.manager );
 
@@ -198,7 +221,8 @@ class KTX2Loader extends Loader {
 
 	}
 
-	createTextureFrom( transcodeResult ) {
+	_createTextureFrom( transcodeResult ) {
+
 		const { mipmaps, width, height, format, type, error, dfdTransferFn, dfdFlags } = transcodeResult;
 
 		if ( type === 'error' ) return Promise.reject( error );
@@ -208,7 +232,7 @@ class KTX2Loader extends Loader {
 		texture.magFilter = LinearFilter;
 		texture.generateMipmaps = false;
 		texture.needsUpdate = true;
-		texture.encoding = dfdTransferFn === KTX2TransferSRGB ? sRGBEncoding: LinearEncoding;
+		texture.encoding = dfdTransferFn === KTX2TransferSRGB ? sRGBEncoding : LinearEncoding;
 		texture.premultiplyAlpha = !! ( dfdFlags & KTX2_ALPHA_PREMULTIPLIED );
 
 		return texture;
@@ -227,7 +251,7 @@ class KTX2Loader extends Loader {
 
 			return this.workerPool.postMessage( { type: 'transcode', buffers, taskConfig: taskConfig }, buffers );
 
-		} ).then( ( e ) => this.createTextureFrom( e.data ) );
+		} ).then( ( e ) => this._createTextureFrom( e.data ) );
 
 		// Cache the task result.
 		_taskCache.set( buffers[ 0 ], { promise: texturePending } );
@@ -240,6 +264,8 @@ class KTX2Loader extends Loader {
 
 		URL.revokeObjectURL( this.workerSourceURL );
 		this.workerPool.dispose();
+
+		_activeLoaders--;
 
 		return this;
 
@@ -376,7 +402,7 @@ KTX2Loader.BasisWorker = function () {
 
 		}
 
-		if ( !ktx2File.isValid() ) {
+		if ( ! ktx2File.isValid() ) {
 
 			cleanup();
 			throw new Error( 'THREE.KTX2Loader:	Invalid or unsupported .ktx2 file' );
@@ -411,7 +437,7 @@ KTX2Loader.BasisWorker = function () {
 
 		for ( let mip = 0; mip < levels; mip ++ ) {
 
-			const levelInfo = ktx2File.getImageLevelInfo( mip, 0, 0 )
+			const levelInfo = ktx2File.getImageLevelInfo( mip, 0, 0 );
 			const mipWidth = levelInfo.origWidth;
 			const mipHeight = levelInfo.origHeight;
 			const dst = new Uint8Array( ktx2File.getImageTranscodedSizeInBytes( mip, 0, 0, transcoderFormat ) );
@@ -423,8 +449,8 @@ KTX2Loader.BasisWorker = function () {
 				0,
 				transcoderFormat,
 				0,
-				-1,
-				-1,
+				- 1,
+				- 1,
 			);
 
 			if ( ! status ) {
@@ -560,6 +586,6 @@ KTX2Loader.BasisWorker = function () {
 
 	}
 
-}
+};
 
 export { KTX2Loader };
