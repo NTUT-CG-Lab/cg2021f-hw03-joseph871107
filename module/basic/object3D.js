@@ -1,12 +1,20 @@
+import * as SkeletonUtils from "../../jsm/utils/SkeletonUtils.js"
+
 export class Object3D{
-    constructor(scene, object3D, name){
+    constructor(scene, object3D){
         this.scene = scene;
         this.object3D = object3D;
     }
 
+    clone(scene){
+        return new Object3D(scene, SkeletonUtils.clone(this.object3D));
+    }
+
     dispose(){
         this.hide();
-        delete this.object3D;
+        
+        this.scene = null;
+        this.object3D = null;
     }
 
     hide(){

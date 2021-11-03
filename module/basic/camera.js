@@ -1,11 +1,18 @@
 import * as THREE from '../../build/three.module.js';
 
 export class Camera extends THREE.OrthographicCamera{
-    constructor(scene, effect, left, right, top, bottom, near, far){
+    constructor(scene, renderer, left, right, top, bottom, near, far){
         super(left, right, top, bottom, near, far);
 
         this.scene = scene;
-        this.effect = effect;
+        this.renderer = renderer;
+        this.setViewportCal = function(){};
+        this.setViewport(0, 0, window.innerWidth, window.innerHeight);
+    }
+
+    static resizeCamera(camera, resizeParams){
+        camera.setViewportCal(resizeParams.width, resizeParams.height);
+        camera.resize(resizeParams.scale, resizeParams.offset);
     }
 
     setViewport(x, y, width, height){
@@ -15,11 +22,12 @@ export class Camera extends THREE.OrthographicCamera{
             width: width,
             height: height,
         };
+        this.resize(1);
     }
 
     render(){
-        this.effect.setViewport(this.viewport.x, this.viewport.y, this.viewport.width, this.viewport.height);
-        this.effect.render(this.scene, this);
+        this.renderer.setViewport(this.viewport.x, this.viewport.y, this.viewport.width, this.viewport.height);
+        this.renderer.render(this.scene, this);
     }
 
     resize(scale, offset = new THREE.Vector3(0, 0, 0)){

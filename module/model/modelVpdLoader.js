@@ -22,7 +22,8 @@ export class ModelVpdLoader{
                 } else {
                     scope.callback(scope);
                 }
-            }, (xhr) => BasicLoader.onProgress(xhr, 'ModelVpdLoader : '), null);
+            // }, (xhr) => BasicLoader.onProgress(xhr, 'ModelVpdLoader : '), null);
+            }, (xhr) => {}, null);
         }
         loadVpd();
 

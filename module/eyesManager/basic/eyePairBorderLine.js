@@ -35,6 +35,13 @@ export class EyePairBorderLine{
         this.rightEye.show();
     }
 
+    singleShow(index){
+        if (index)
+            this.leftEye.show();
+        else
+            this.rightEye.show();
+    }
+
     hide(){
         this.leftEye.hide();
         this.rightEye.hide();

@@ -29,7 +29,21 @@ export class MouseRaycaster{
     }
 
     update(event){
-        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        var x = event.clientX;
+        var y = window.innerHeight - event.clientY - 1;
+
+        if (this.camera){
+            var width = this.camera.viewport.width;
+            var height = this.camera.viewport.height;
+            var left = this.camera.viewport.x;
+            var right = this.camera.viewport.x + width;
+            var bottom = this.camera.viewport.y;
+            var top = this.camera.viewport.y + height;
+
+            if (left <= x && x <= right && bottom <= y && y <= top){
+                this.mouse.x = ((x - left) / width) * 2 - 1;
+                this.mouse.y = ((y - bottom) / height) * 2 - 1;
+            }
+        }
     }
 };

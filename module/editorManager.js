@@ -1,25 +1,26 @@
 import * as THREE from '../build/three.module.js';
 import { MouseRaycaster } from './basic/mouseRaycaster.js';
 import { ModelVpdLoader } from './model/modelVpdLoader.js';
+import { ModelLoader } from './model/modelLoader.js';
 import { ModelVpdGui } from './model/modelVpdGui.js';
-import { PmxEditor } from './pmxEditor.js';
+import { PmxEditorContainer } from './pmxManager/pmxEditorContainer.js';
+import { SplitFiveEditor } from './pmxManager/splitFiveEditor.js';
 
 export class EditorManager{
-    constructor(renderer, scene, camera, cameraControls, gui){
+    constructor(renderer, effect, gui){
         this.renderer = renderer;
-        this.scene = scene;
-        this.camera = camera;
-		this.cameraControls = cameraControls;
+        this.effect = effect;
 		this.gui = gui;
 
         this.editors = [];
         this.editor;
+        this.modelEditors = [];
+        this.modelEditor;
 
 		this.scale = 30;
 		this.zoomState = false;
-        this.mouseRaycaster = new MouseRaycaster(scene, camera, renderer.domElement);
         this.modelList = EditorManager.readJson('model_list.json');
-        this.currentModelIndex = 3;
+        this._currentModelIndex = 0;
 
         const modelIndexGui = gui.addFolder('Model');
         const controls = { index: -1 };
@@ -35,46 +36,24 @@ export class EditorManager{
         this.modelIndexGui = modelIndexGui;
         this.controls = controls;
         
-        const vpdFiles = [
-            'models/mmd/vpds/01.vpd',
-            'models/mmd/vpds/02.vpd',
-            'models/mmd/vpds/03.vpd',
-            'models/mmd/vpds/04.vpd',
-            'models/mmd/vpds/05.vpd',
-            'models/mmd/vpds/06.vpd',
-            'models/mmd/vpds/07.vpd',
-            'models/mmd/vpds/08.vpd',
-            //'models/mmd/vpds/09.vpd',
-            //'models/mmd/vpds/10.vpd',
-            'models/mmd/vpds/11.vpd'
-        ];
-        this.vpdLoader = new ModelVpdLoader(vpdFiles);
+        // const vpdFiles = [
+        //     'models/mmd/vpds/01.vpd',
+        //     'models/mmd/vpds/02.vpd',
+        //     'models/mmd/vpds/03.vpd',
+        //     'models/mmd/vpds/04.vpd',
+        //     'models/mmd/vpds/05.vpd',
+        //     'models/mmd/vpds/06.vpd',
+        //     'models/mmd/vpds/07.vpd',
+        //     'models/mmd/vpds/08.vpd',
+        //     //'models/mmd/vpds/09.vpd',
+        //     //'models/mmd/vpds/10.vpd',
+        //     'models/mmd/vpds/11.vpd'
+        // ];
+        // this.vpdLoader = new ModelVpdLoader(vpdFiles);
 
-        var scope = this;
-        var process = function (pmxEditor, flag) {
-            var currentMesh = pmxEditor.modelLoader.model;
-            currentMesh.object3D.position.y = - 10;
-            scope.editors.push(pmxEditor);
-            
-            if (flag){
-                pmxEditor.show();
-                scope.editor = pmxEditor;
-
-                scope.controls.index = pmxEditor.modelLoader.name;
-                scope.modelIndexGui.updateDisplay();
-            }
-        }
-        for (let i = 0; i < this.modelList.modellist.length; i++){
-            let modelFile = this.modelList.modellist[i];
-            var editor = new PmxEditor(
-                scene,
-                camera,
-                modelFile.location,
-                this.mouseRaycaster,
-                gui,
-                this.vpdLoader,
-                (pmxEditor) => process(pmxEditor, i==0)
-            );
+        var i = 0;
+        for(var i=0; i<this.modelList.modellist.length; i++){
+            this.createModelEditor(i);
         }
     }
 
@@ -94,72 +73,90 @@ export class EditorManager{
         a.click();
     }
 
-    zoom2Eye(index){
-        this.scale = 1000;
-        var offset = this.editor.getEyePosition(index);
-        this.camera.resize(this.scale, offset);
-    }
+    createModelEditor(index, callback=function(){}){
+        var scope = this;
 
-    zoom(index){
-        this.cameraControls.reset();
-        this.zoomState = !this.zoomState;
-        if (this.zoomState){
-            this.zoom2Eye(index);
-        }
-        else{
-            this.scale = 30;
-            this.camera.resize(this.scale);
-        }
+        new SplitFiveEditor(
+            scope.renderer,
+            scope.effect,
+            scope.modelList.modellist[index].location,
+            (modelEditor) => {
+                scope.modelEditors[index] = modelEditor;
+                if(index == 0){
+                    scope.modelEditor = modelEditor;
+                    scope.controls.index = modelEditor.name;
+                    scope.modelIndexGui.updateDisplay();
+                }
+                callback(modelEditor);
+            }
+        )
     }
 
     changeModel(index){
-        this.editor.hide();
-        this.editor = this.editors[index];
-        this.editor.show();
+        if (!this.modelEditors[index]){
+            this.createModelEditor(index, (modelEditor)=> {
+                this.modelEditor = this.modelEditors[index];
+                this.modelEditor.onWindowResize();
+            });
+        }
+        else{
+            this.modelEditor = this.modelEditors[index];
+            this.modelEditor.onWindowResize();
+        }
+    }
 
-        // zoomState = true;
-        // zoom();
+    set currentModelIndex(index){
+        this._currentModelIndex = index;
+        this.changeModel(index);
+    }
+
+    get currentModelIndex(){
+        return this._currentModelIndex;
     }
     
     changeWithIncrement(increment){
-        var length = this.editors.length;
+        var length = this.modelList.modellist.length;
 
-        this.currentModelIndex = (this.currentModelIndex+increment) % length;
-        if(this.currentModelIndex==-1)
-        this.currentModelIndex = length-1;
-
-        this.changeModel(this.currentModelIndex);
-        this.controls.index = this.editor.modelLoader.name;
+        var index = (this.currentModelIndex+increment) % length;
+        if(index==-1)
+            index = length-1;
+        this.currentModelIndex = index;
+        
+        this.controls.index = this.modelEditor.name;
         this.modelIndexGui.updateDisplay();
     }
 
     onChangeModel(scope) {
-        const index = scope.editors.findIndex((editor) => editor.modelLoader.name == scope.controls.index);
-        this.changeModel(index);
+        const index = scope.modelList.modellist.findIndex((model) => ModelLoader.getNameFromPath(model.location) == scope.controls.index);
+        if (!(0 <= index && index < this.modelList.modellist.length))
+            return;
+        
+        this.currentModelIndex = index;
     }
 
     updateModelList(){
-        var modelList = this.modelList.modellist;
-        for(var i=0; i<modelList.length; i++){
-            modelList[i] = this.editors[i].toJSON();
+        for(var i=0; i<this.modelList.modellist.length; i++){
+            this.modelList.modellist[i] = this.modelEditors[i].toJSON();
         }
     }
 
-    onMouseMove() {
-        if (this.editor)
-        this.editor.onMouseMove();
+    onWindowResize(event) {
+        this?.modelEditor?.onWindowResize(event);
     }
 
-    onMouseDown() {
-        if (this.editor)
-        this.editor.onMouseDown();
+    onMouseMove(event) {
+        this?.modelEditor?.onMouseMove(event);
+    }
+
+    onMouseDown(event) {
+        this?.modelEditor?.onMouseDown(event);
     }
 
     onKeyDown(event){
+        this?.modelEditor?.onKeyDown(event);
+
         var key = event.key;
 
-        if (this.editor)
-        this.editor.onKeyDown(event);
         switch(key){
             case 'a':
                 this.changeWithIncrement(-1);
@@ -168,7 +165,7 @@ export class EditorManager{
                 this.changeWithIncrement(1);
                 break
             case 'e':
-                this.zoom(0);
+                this.modelEditor.zoom();
                 break
             case 's':
                 this.updateModelList();
@@ -184,16 +181,25 @@ export class EditorManager{
                     var fileList = input.files;
                     var fr=new FileReader();
                     fr.onload=function(){
-                        scope.modelList = JSON.parse(fr.result);
-                        for(var thisEditor of scope.editors){
-                            thisEditor.fromJSON(scope.modelList.modellist.find((a)=>a.location==thisEditor.modelPath), scope.scene, scope.camera, scope.mouseRaycaster, scope.gui, scope.vpdLoader);
+                        var modelList = JSON.parse(fr.result);
+                        scope.modelList = {'modellist':[]};
+                        for(var thisModelEditor of scope.modelEditors){
+                            var found = modelList.modellist.find((a)=>a.location==thisModelEditor.modelPath);
+                            if (found){
+                                thisModelEditor.fromJSON(found);
+                                scope.modelList.modellist.push(found);
+                            }
                         }
-                        scope.editor.eyeLabelSystem.show();
                     }
                     
                     fr.readAsText(fileList[0]);
                 }
                 break
         }
+    }
+
+    render(){
+        if (this.modelEditor)
+            this.modelEditor.render();
     }
 };

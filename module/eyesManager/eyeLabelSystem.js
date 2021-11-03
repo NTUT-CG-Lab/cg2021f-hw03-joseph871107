@@ -12,13 +12,12 @@ export class EyeLabelSystem{
         }
     )
 
-    constructor(scene, mouseRaycaster){
-        this.initialize(scene, mouseRaycaster);
+    constructor(scene){
+        this.initialize(scene);
     }
 
-    initialize(scene, mouseRaycaster){
+    initialize(scene){
         this.scene = scene;
-        this.mouseRaycaster = mouseRaycaster;
 
         this.eyePairBorders = new Array(4);
         this.state = EyeLabelSystem.states.idle;
@@ -30,7 +29,10 @@ export class EyeLabelSystem{
                 eyePairBorders.dispose()
     }
 
-    replaceEyeLabel(index, mouse = this.mouseRaycaster.position){
+    replaceEyeLabel(index, mouse = this.mouse){
+        if (!mouse)
+            return false;
+
         if (this.eyePairBorders[index])
             this.eyePairBorders[index].dispose();
 
@@ -56,16 +58,16 @@ export class EyeLabelSystem{
                 break
         }
         this.eyePairBorders[index] = new EyePairBorderLine(this.scene, mouse, start, end, color1, color2, (index == 0 || index == 2));
+        return true;
     }
 
-    labelEye(label = true, mouse){
+    labelEye(){
         if (this.isLabeling){
             if (this.eyePairBorders[this.index]){
                 this.eyePairBorders[this.index].dispose();
                 delete this.eyePairBorders[this.index];
             }
-            if (label){
-                this.replaceEyeLabel(this.index, mouse);
+            if (this.replaceEyeLabel(this.index)){
                 this.eyePairBorders[this.index].show();
             }
         }
@@ -141,6 +143,12 @@ export class EyeLabelSystem{
                 eyePairBorders.showRight();
     }
 
+    singleShow(index){
+        for(let eyePairBorders of this.eyePairBorders)
+            if (eyePairBorders)
+                eyePairBorders.singleShow(index);
+    }
+
     clear(){
         for(let eyePairBorders of this.eyePairBorders){
             if (eyePairBorders)
@@ -149,9 +157,16 @@ export class EyeLabelSystem{
         this.eyePairBorders = new Array(4);
     }
 
+    get mouse(){
+        if (this.mouseRaycaster)
+            return this.mouseRaycaster.position;
+        else
+            return null;
+    }
+
     update(){
-        var mouse = this.mouseRaycaster.position;
-        if (this.isLabeling){
+        var mouse = this.mouse;
+        if (this.isLabeling && mouse){
             var ptr = this.eyePairBorders[this.index];
             if (ptr.horizontal)
                 ptr.Y = mouse.y;
@@ -179,9 +194,9 @@ export class EyeLabelSystem{
         return obj;
     }
 
-    fromJSON(serialize, scene, mouseRaycaster){
+    fromJSON(serialize, scene){
         this.dispose();
-        this.initialize(scene, mouseRaycaster);
+        this.initialize(scene);
         for(var j=0; j< this.eyePairBorders.length; j++){
             if (`line_locationx_${j+1}` in serialize && `line_locationy_${j+1}` in serialize){
                 var mouse = new THREE.Vector2(serialize[`line_locationx_${j+1}`], serialize[`line_locationy_${j+1}`]);
