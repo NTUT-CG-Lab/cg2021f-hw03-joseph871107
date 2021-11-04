@@ -35,6 +35,7 @@ export class MainApp{
         gui.closed = true;
 
         window.addEventListener('resize', this.onWindowResize);
+        window.addEventListener("contextmenu", e => e.preventDefault());
         document.addEventListener('mousemove', this.onDocumentMouseMove, false);
         document.addEventListener('mousedown', this.onDocumentMouseDown, false);
         document.addEventListener("keydown", this.onDocumentKeyDown, false);

@@ -1,38 +1,37 @@
 {
-    "modellist":[
+    "modellist": [
         {
-        "location":"models/mmd/るいのれ式物述有栖_配布用フォルダ/物述有栖.pmx",
-        "line_locationx_1":0,
-        "line_locationy_1":0,
-        "line_locationx_2":0,
-        "line_locationy_2":0,
-        "line_locationx_3":0,
-        "line_locationy_3":0,
-        "line_locationx_4":0,
-        "line_locationy_4":0
+            "location": "models/mmd/kizunaai/kizunaai.pmx",
+            "line_locationx_1": 0.7139086003303527,
+            "line_locationy_1": 8.403480041503906,
+            "line_locationx_2": 0.7269086003303528,
+            "line_locationy_2": 8.131480041503906,
+            "line_locationx_3": 0.5359086003303526,
+            "line_locationy_3": 8.011480041503907,
+            "line_locationx_4": 0.2589086003303526,
+            "line_locationy_4": 8.395480041503907
         },
         {
-        "location":"models/mmd/kizunaai/kizunaai.pmx",
-        "line_locationx_1":0,
-        "line_locationy_1":0,
-        "line_locationx_2":0,
-        "line_locationy_2":0,
-        "line_locationx_3":0,
-        "line_locationy_3":0,
-        "line_locationx_4":0,
-        "line_locationy_4":0
+            "location": "models/mmd/『天宮こころ(Kokoro Amamiya)』/『天宮こころ(Kokoro Amamiya)』.pmx",
+            "line_locationx_1": 0.49286930227279657,
+            "line_locationy_1": 5.57660008239746,
+            "line_locationx_2": 0.7568693022727965,
+            "line_locationy_2": 5.4996000823974605,
+            "line_locationx_3": 0.5718693022727965,
+            "line_locationy_3": 5.33960008239746,
+            "line_locationx_4": 0.29486930227279656,
+            "line_locationy_4": 5.38560008239746
         },
         {
-        "location":"models/mmd/『天宮こころ(Kokoro Amamiya)』/『天宮こころ(Kokoro Amamiya)』.pmx",
-        "line_locationx_1":0,
-        "line_locationy_1":0,
-        "line_locationx_2":0,
-        "line_locationy_2":0,
-        "line_locationx_3":0,
-        "line_locationy_3":0,
-        "line_locationx_4":0,
-        "line_locationy_4":0
+            "location": "models/mmd/るいのれ式物述有栖_配布用フォルダ/物述有栖.pmx",
+            "line_locationx_1": 0.4948693022727966,
+            "line_locationy_1": 4.7386000823974594,
+            "line_locationx_2": 0.7798693022727965,
+            "line_locationy_2": 4.5446000823974595,
+            "line_locationx_3": 0.5728693022727964,
+            "line_locationy_3": 4.324600082397459,
+            "line_locationx_4": 0.3128693022727965,
+            "line_locationy_4": 4.444600082397459
         }
     ]
-
 }

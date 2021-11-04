@@ -20,6 +20,11 @@ export class EditorManager{
 		this.scale = 30;
 		this.zoomState = false;
         this.modelList = EditorManager.readJson('model_list.json');
+        try {
+            this.modelList = EditorManager.readJson('model_data.json');
+        } catch (error) {
+            this.modelList = EditorManager.readJson('model_list.json');
+        }          
         this._currentModelIndex = 0;
 
         const modelIndexGui = gui.addFolder('Model');

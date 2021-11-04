@@ -26,9 +26,7 @@ export class Object3D{
     }
 
     resetPosition(){
-        this.object3D.position.x = 0;
-        this.object3D.position.y = 0;
-        this.object3D.position.z = 0;
+        this.object3D.position.set(0, 0, 0);
     }
     
     findBone(name, obj = this.object3D){
