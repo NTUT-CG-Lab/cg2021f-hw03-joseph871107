@@ -16,7 +16,7 @@ export class EyePairBorderLine{
         
         this.mouse = mouse;
         this.horizontal = horizontal;
-        this.showRightFlag = false;
+        // this.showRightFlag = false;
     }
 
     dispose(){
@@ -24,22 +24,22 @@ export class EyePairBorderLine{
         this.rightEye.dispose();
     }
 
-    show(){
-        this.leftEye.show();
-        if (this.showRightFlag)
-            this.showRight();
-    }
+    // show(){
+    //     this.leftEye.show();
+    //     if (this.showRightFlag)
+    //         this.showRight();
+    // }
 
-    showRight(){
-        this.showRightFlag = true;
-        this.rightEye.show();
-    }
+    // showRight(){
+    //     this.showRightFlag = true;
+    //     this.rightEye.show();
+    // }
 
     singleShow(index){
         if (index)
-            this.leftEye.show();
-        else
             this.rightEye.show();
+        else
+            this.leftEye.show();
     }
 
     hide(){

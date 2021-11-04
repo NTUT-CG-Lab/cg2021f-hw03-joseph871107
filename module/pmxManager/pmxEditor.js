@@ -121,6 +121,24 @@ export class PmxEditor{
         return PmxEditor.getWorldPosition(this.eyes[index].children[0]);
     }
 
+    updateEyePosition(index, pos, horizontal){
+        var eye = this.eyes[index];
+        
+        var rotation;
+        var rotation = new THREE.Vector3(
+            horizontal ? pos.x: 0,
+            horizontal ? 0 : -pos.y,
+            0
+        ).multiplyScalar(1/3).multiplyScalar(Math.PI);
+
+        // var bbox = this?.eyeLabelSystem?.getBbox(index);
+        // if (bbox.containsPoint(pos.clone())){
+            eye.rotation.x = rotation.y;
+            eye.rotation.y = rotation.x;
+        // }
+        return eye.rotation;
+    }
+
     hide(){
         this.modelLoader.model.hide();
         this.eyeLabelSystem.hide();
@@ -128,7 +146,7 @@ export class PmxEditor{
 
     show(){
         this.modelLoader.model.show();
-        this.eyeLabelSystem.show();
+        // this.eyeLabelSystem.show();
     }
 
     onMouseMove(event) {
@@ -140,6 +158,7 @@ export class PmxEditor{
     }
 
     onKeyDown(event){
+        /*
         var key = event.key;
         switch(key){
             case 'q':
@@ -155,6 +174,7 @@ export class PmxEditor{
                 this?.eyeLabelSystem?.keyDown(index);
                 break
         }
+        */
     }
 
     toJSON(){

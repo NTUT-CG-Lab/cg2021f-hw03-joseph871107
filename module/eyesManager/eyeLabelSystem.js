@@ -19,14 +19,29 @@ export class EyeLabelSystem{
     initialize(scene){
         this.scene = scene;
 
-        this.eyePairBorders = new Array(4);
+        this.sliceSize = new THREE.Vector2(4, 8);
+        this.clear();
+
         this.state = EyeLabelSystem.states.idle;
     }
 
-    dispose(){
-        for(var eyePairBorders of this.eyePairBorders)
-            if (eyePairBorders)
-                eyePairBorders.dispose()
+    disposeEyeLabels(){
+        if (this.eyePairBorders){
+            this?.eyePairBorders?.forEach((eyePairBorders) => {
+                if (eyePairBorders)
+                    eyePairBorders.dispose();
+            });
+            this.eyePairBorders = null;
+        }
+        if (this.eyePairBordersMiddle){
+            this?.eyePairBordersMiddle?.forEach((middles) => {
+                for(let middle of middles){
+                    if (middle)
+                        middle.dispose();
+                }
+            });
+            this.eyePairBordersMiddle = null;
+        }
     }
 
     replaceEyeLabel(index, mouse = this.mouse){
@@ -58,6 +73,35 @@ export class EyeLabelSystem{
                 break
         }
         this.eyePairBorders[index] = new EyePairBorderLine(this.scene, mouse, start, end, color1, color2, (index == 0 || index == 2));
+        
+        if (this.eyePairBorders[0] && this.eyePairBorders[2] && (index == 0 || index == 2)){
+            var ys = [this.eyePairBorders[0].mouse.y, this.eyePairBorders[2].mouse.y];
+            var minY = Math.min.apply(Math, ys);
+            var maxY = Math.max.apply(Math, ys);
+            var size = this.sliceSize.x;
+            var increment = (maxY - minY) / size;
+
+            for(var i = 0; i < size - 1; i++){
+                start.y = minY + increment * (i+1);
+                end.y = minY + increment * (i+1);
+                this.eyePairBordersMiddle[index % 2][i] = new EyePairBorderLine(this.scene, null, start, end, color1, color2, (index == 0 || index == 2));
+            }
+        }
+
+        if (this.eyePairBorders[1] && this.eyePairBorders[3] && (index == 1 || index == 3)){
+            var xs = [this.eyePairBorders[1].mouse.x, this.eyePairBorders[3].mouse.x];
+            var minX = Math.min.apply(Math, xs);
+            var maxX = Math.max.apply(Math, xs);
+            var size = this.sliceSize.y;
+            var increment = (maxX - minX) / size;
+
+            for(var i = 0; i < size - 1; i++){
+                start.x = minX + increment * (i+1);
+                end.x = minX + increment * (i+1);
+                this.eyePairBordersMiddle[index % 2][i] = new EyePairBorderLine(this.scene, null, start, end, color1, color2, (index == 0 || index == 2));
+            }
+        }
+        
         return true;
     }
 
@@ -122,11 +166,19 @@ export class EyeLabelSystem{
     }
 
     hide(){
-        for(let eyePairBorders of this.eyePairBorders)
+        this?.eyePairBorders?.forEach((eyePairBorders) => {
             if (eyePairBorders)
                 eyePairBorders.hide();
+        });
+        this?.eyePairBordersMiddle?.forEach((middles) => {
+            middles.forEach((middle) => {
+                if (middle)
+                    middle.hide();
+            });
+        });
     }
 
+    /*
     show(){
         for(let eyePairBorders of this.eyePairBorders)
             if (eyePairBorders)
@@ -142,19 +194,56 @@ export class EyeLabelSystem{
             for(let eyePairBorders of this.eyePairBorders)
                 eyePairBorders.showRight();
     }
+    */
 
     singleShow(index){
-        for(let eyePairBorders of this.eyePairBorders)
+        this?.eyePairBorders?.forEach((eyePairBorders) => {
             if (eyePairBorders)
                 eyePairBorders.singleShow(index);
+        });
+        this?.eyePairBordersMiddle?.forEach((middles) => {
+            middles.forEach((middle) => {
+                if (middle)
+                    middle.singleShow(index);
+            });
+        });
     }
 
     clear(){
-        for(let eyePairBorders of this.eyePairBorders){
-            if (eyePairBorders)
-                eyePairBorders.dispose();
-        }
+        this.disposeEyeLabels();
+
         this.eyePairBorders = new Array(4);
+        this.eyePairBordersMiddle = new Array(2);
+
+        var sliceSizeArray = this.sliceSize.toArray();
+        for(var i = 0; i < sliceSizeArray.length; i++){
+            this.eyePairBordersMiddle[i] = new Array(sliceSizeArray[i] - 1);
+        }
+    }
+
+    getBbox(index){
+        var key = index == 0 ? 'leftEye' : 'rightEye';
+        var xs = [];
+        var ys = [];
+        var z;
+        this?.eyePairBorders?.forEach((eyePairBorders) => {
+            var eyeObj = eyePairBorders?.[key];
+            if (eyePairBorders.horizontal)
+                ys.push(eyeObj.start.y);
+            else
+                xs.push(eyeObj.start.x);
+        });
+
+        return new THREE.Box2(
+            new THREE.Vector2(
+                Math.min.apply(Math, xs),
+                Math.min.apply(Math, ys),
+            ),
+            new THREE.Vector2(
+                Math.max.apply(Math, xs),
+                Math.max.apply(Math, ys),
+            ),
+        );
     }
 
     get mouse(){
@@ -176,10 +265,10 @@ export class EyeLabelSystem{
     }
 
     updateBorder(camera){
-        for(let eyePairBorders of this.eyePairBorders){
+        this?.eyePairBorders?.forEach((eyePairBorders) => {
             if (eyePairBorders)
                 eyePairBorders.updateBorder(camera);
-        }
+        });
     }
 
     toJSON(){
@@ -195,7 +284,7 @@ export class EyeLabelSystem{
     }
 
     fromJSON(serialize, scene){
-        this.dispose();
+        this.disposeEyeLabels();
         this.initialize(scene);
         for(var j=0; j< this.eyePairBorders.length; j++){
             if (`line_locationx_${j+1}` in serialize && `line_locationy_${j+1}` in serialize){

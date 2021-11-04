@@ -80,11 +80,12 @@ export class EditorManager{
 
     createModelEditor(index, callback=function(){}){
         var scope = this;
+        var modelInfo = scope.modelList.modellist[index];
 
         new SplitFiveEditor(
             scope.renderer,
             scope.effect,
-            scope.modelList.modellist[index].location,
+            modelInfo.location,
             (modelEditor) => {
                 scope.modelEditors[index] = modelEditor;
                 if(index == 0){
@@ -93,6 +94,21 @@ export class EditorManager{
                     scope.modelIndexGui.updateDisplay();
                 }
                 callback(modelEditor);
+
+                var filteredArray = [
+                    'line_locationx_1',
+                    'line_locationy_1',
+                    'line_locationx_2',
+                    'line_locationy_2',
+                    'line_locationx_3',
+                    'line_locationy_3',
+                    'line_locationx_4',
+                    'line_locationy_4',
+                ].filter(value => Object.keys(modelInfo).includes(value));
+                if (filteredArray.length == 8){
+                    console.log('Loading from serilaized data (' + modelInfo.location + ')')
+                    modelEditor.fromJSON(modelInfo);
+                }
             }
         )
     }
