@@ -1,4 +1,4 @@
-import * as SkeletonUtils from "../../jsm/utils/SkeletonUtils.js"
+import * as SkeletonUtils from "../../libs/jsm/utils/SkeletonUtils.js"
 
 export class Object3D{
     constructor(scene, object3D){

@@ -1,9 +1,9 @@
 import * as THREE from '../build/three.module.js';
 
-import { GUI } from '../jsm/libs/dat.gui.module.js';
+import { GUI } from '../libs/jsm/libs/dat.gui.module.js';
 
-import { OrbitControls } from '../jsm/controls/OrbitControls.js';
-import { OutlineEffect } from '../jsm/effects/OutlineEffect.js';
+import { OrbitControls } from '../libs/jsm/controls/OrbitControls.js';
+import { OutlineEffect } from '../libs/jsm/effects/OutlineEffect.js';
 
 import { EditorManager } from './editorManager.js';
 

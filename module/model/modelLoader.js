@@ -1,5 +1,5 @@
-import { MMDLoader } from '../../jsm/loaders/MMDLoader.js';
-import { MMDAnimationHelper } from '../../jsm/animation/MMDAnimationHelper.js';
+import { MMDLoader } from '../../libs/jsm/loaders/MMDLoader.js';
+import { MMDAnimationHelper } from '../../libs/jsm/animation/MMDAnimationHelper.js';
 import { MorphObject3D } from '../basic/morphObject3D.js';
 
 export class BasicLoader{

@@ -1,5 +1,5 @@
 import { Object3D } from "./object3D.js"
-import * as SkeletonUtils from "../../jsm/utils/SkeletonUtils.js"
+import * as SkeletonUtils from "../../libs/jsm/utils/SkeletonUtils.js"
 
 export class MorphObject3D extends Object3D{
     constructor(scene, object3D){
